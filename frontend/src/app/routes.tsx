@@ -10,6 +10,7 @@ import { Teaching } from "./pages/Teaching";
 import { Feed } from "./pages/Feed";
 import { Profile } from "./pages/Profile";
 import { TeacherDashboard } from "./pages/TeacherDashboard";
+import { AdminDashboard } from "./pages/AdminDashboard";
 import { CodeGrind } from "./code_grind/CodeGrind";
 
 export const router = createBrowserRouter([
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
       { path: "feed", Component: Feed },
       { path: "profile", Component: Profile },
       { path: "teacher-dashboard", Component: TeacherDashboard },
+      { path: "admin", Component: AdminDashboard },
       { path: "code-grind", Component: CodeGrind },
     ],
   },

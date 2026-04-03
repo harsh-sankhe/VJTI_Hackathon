@@ -1,5 +1,8 @@
 import { CheckCircle2, Circle, Flame, Zap, TrendingUp, Calendar, Brain, Target } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
+import { codeGrindApi } from "../code_grind/api";
 
 const weeklyData = [
   { day: "Mon", hours: 2.5, xp: 150 },
@@ -20,6 +23,22 @@ const todayTasks = [
 ];
 
 export function Dashboard() {
+  const navigate = useNavigate();
+  const [userName, setUserName] = useState('Student');
+  const [userStats, setUserStats] = useState<{ xp: number; streak: number; total_solved: number } | null>(null);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('auth_user');
+    if(stored) {
+      try {
+        const u = JSON.parse(stored);
+        if(u.role === 'admin') { navigate('/app/admin'); return; }
+        if(u.name) setUserName(u.name);
+      } catch(e) {}
+    }
+    // Fetch live stats
+    codeGrindApi.getStats().then(s => setUserStats(s)).catch(() => {});
+  }, [navigate]);
   const completedTasks = todayTasks.filter((t) => t.completed).length;
   const totalTasks = todayTasks.length;
   const progressPercentage = (completedTasks / totalTasks) * 100;
@@ -29,7 +48,7 @@ export function Dashboard() {
       {/* Welcome Section */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="mb-2">Welcome back, Harsh 👋</h1>
+          <h1 className="mb-2">Welcome back, {userName} 👋</h1>
           <p className="text-muted-foreground">Let's continue your learning journey today</p>
         </div>
         <div className="hidden md:flex gap-3">
@@ -101,7 +120,7 @@ export function Dashboard() {
           <div className="flex items-center gap-4">
             <div className="text-6xl">🔥</div>
             <div>
-              <div className="text-4xl font-bold text-foreground">12</div>
+              <div className="text-4xl font-bold text-foreground">{userStats?.streak ?? '—'}</div>
               <div className="text-sm text-muted-foreground mt-1">days in a row</div>
             </div>
           </div>
@@ -121,7 +140,7 @@ export function Dashboard() {
           <div className="space-y-4">
             <div>
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-bold text-foreground">1,440</span>
+                <span className="text-4xl font-bold text-foreground">{userStats ? userStats.xp.toLocaleString() : '—'}</span>
                 <span className="text-sm text-muted-foreground">XP</span>
               </div>
               <p className="text-sm text-[#22c55e] mt-1">+220 this week ↑</p>

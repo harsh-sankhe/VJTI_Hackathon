@@ -1,0 +1,12 @@
+﻿Testing db.uzivikolecaudvowneno.supabase.co:5432 with user postgres (ssl: true)
+FAILED: db.uzivikolecaudvowneno.supabase.co:5432 - timeout expired
+Testing db.uzivikolecaudvowneno.supabase.co:6543 with user postgres (ssl: true)
+FAILED: db.uzivikolecaudvowneno.supabase.co:6543 - timeout expired
+Testing db.uzivikolecaudvowneno.supabase.co:6543 with user postgres.uzivikolecaudvowneno (ssl: true)
+FAILED: db.uzivikolecaudvowneno.supabase.co:6543 - timeout expired
+Testing aws-0-ap-south-1.pooler.supabase.com:6543 with user postgres.uzivikolecaudvowneno (ssl: true)
+FAILED: aws-0-ap-south-1.pooler.supabase.com:6543 - Tenant or user not found
+Testing aws-0-ap-southeast-1.pooler.supabase.com:6543 with user postgres.uzivikolecaudvowneno (ssl: true)
+FAILED: aws-0-ap-southeast-1.pooler.supabase.com:6543 - Tenant or user not found
+Testing aws-0-us-east-1.pooler.supabase.com:6543 with user postgres.uzivikolecaudvowneno (ssl: true)
+FAILED: aws-0-us-east-1.pooler.supabase.com:6543 - Tenant or user not found

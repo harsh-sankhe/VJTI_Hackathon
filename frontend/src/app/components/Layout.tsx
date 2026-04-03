@@ -17,12 +17,13 @@ import {
   Sun,
   Moon,
   Code2,
+  Shield,
 } from "lucide-react";
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
-  const [authUser, setAuthUser] = useState({ name: 'Guest', letter: 'G' });
+  const [authUser, setAuthUser] = useState({ name: 'Guest', letter: 'G', role: 'user' });
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -31,18 +32,18 @@ export function Layout() {
     if (stored) {
       try {
         const parsed = JSON.parse(stored);
-        setAuthUser({ name: parsed.name, letter: parsed.name.charAt(0).toUpperCase() });
+        setAuthUser({ name: parsed.name, letter: parsed.name.charAt(0).toUpperCase(), role: parsed.role || 'user' });
       } catch (e) {
         console.error("Failed to parse stored user", e);
       }
     } else {
-      setAuthUser({ name: 'Guest', letter: 'G' });
+      setAuthUser({ name: 'Guest', letter: 'G', role: 'user' });
     }
   }, [location.pathname]);
 
   const handleLogout = () => {
     localStorage.removeItem('auth_user');
-    setAuthUser({ name: 'Guest', letter: 'G' });
+    setAuthUser({ name: 'Guest', letter: 'G', role: 'user' });
     navigate('/');
   };
 
@@ -56,18 +57,26 @@ export function Layout() {
     }
   };
 
-  const navItems = [
-    { path: "/app", label: "Dashboard", icon: Home },
-    { path: "/app/study-plan", label: "Study Plan", icon: Calendar },
-    { path: "/app/quiz", label: "Quiz", icon: Brain },
-    { path: "/app/insights", label: "Insights", icon: TrendingUp },
-    { path: "/app/squad", label: "Squad", icon: Users },
-    { path: "/app/teaching", label: "Teaching", icon: GraduationCap },
-    { path: "/app/feed", label: "Feed", icon: Newspaper },
-    { path: "/app/code-grind", label: "Code Grind", icon: Code2 },
-    { path: "/app/profile", label: "Profile", icon: User },
-    { path: "/app/teacher-dashboard", label: "Teacher Dashboard", icon: BookOpen },
-  ];
+  let navItems = [];
+  
+  if (authUser.role === 'admin') {
+    navItems = [
+      { path: "/app/admin", label: "Admin Center", icon: Shield }
+    ];
+  } else {
+    navItems = [
+      { path: "/app", label: "Dashboard", icon: Home },
+      { path: "/app/study-plan", label: "Study Plan", icon: Calendar },
+      { path: "/app/quiz", label: "Quiz", icon: Brain },
+      { path: "/app/insights", label: "Insights", icon: TrendingUp },
+      { path: "/app/squad", label: "Squad", icon: Users },
+      { path: "/app/teaching", label: "Teaching", icon: GraduationCap },
+      { path: "/app/feed", label: "Feed", icon: Newspaper },
+      { path: "/app/code-grind", label: "Code Grind", icon: Code2 },
+      { path: "/app/profile", label: "Profile", icon: User },
+      { path: "/app/teacher-dashboard", label: "Teacher Dashboard", icon: BookOpen },
+    ];
+  }
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">

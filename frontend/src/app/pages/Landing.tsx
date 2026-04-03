@@ -266,6 +266,8 @@ export function Landing() {
   const [showAuthModal, setShowAuthModal] = useState<'signin' | 'signup' | null>(null);
   const [authName, setAuthName] = useState("");
   const [authEmail, setAuthEmail] = useState("");
+  const [authAdminSecret, setAuthAdminSecret] = useState("");
+  const [showAdminSecret, setShowAdminSecret] = useState(false);
   const [authPassword, setAuthPassword] = useState("");
   const [authError, setAuthError] = useState("");
   const [authLoading, setAuthLoading] = useState(false);
@@ -278,7 +280,7 @@ export function Landing() {
     try {
       let result;
       if (showAuthModal === 'signup') {
-        result = await authApi.register(authName, authEmail, authPassword);
+        result = await authApi.register(authName, authEmail, authPassword, authAdminSecret);
       } else {
         result = await authApi.login(authEmail, authPassword);
       }
@@ -287,9 +289,14 @@ export function Landing() {
         name: result.user.name,
         id: result.user.id,
         token: result.token,
+        role: result.user.app_role || 'user',
       }));
       setShowAuthModal(null);
-      navigate('/app');
+      if (result.user.app_role === 'admin') {
+        navigate('/app/admin');
+      } else {
+        navigate('/app');
+      }
     } catch (err: any) {
       setAuthError(err.message || 'Something went wrong. Please try again.');
     } finally {
@@ -1030,6 +1037,21 @@ export function Landing() {
                   <div className="relative">
                     <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
                     <input type="text" value={authName} onChange={(e) => setAuthName(e.target.value)} required={showAuthModal === 'signup'} className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-[#6366f1] transition-colors text-white placeholder:text-slate-500" placeholder="John Doe" />
+                  </div>
+                </div>
+              )}
+              {showAuthModal === 'signup' && (
+                <div className="flex items-center gap-2 mt-2">
+                  <input type="checkbox" id="adminToggle" checked={showAdminSecret} onChange={(e) => { setShowAdminSecret(e.target.checked); setAuthAdminSecret(""); }} className="rounded border-white/20 bg-white/5 text-[#6366f1] focus:ring-[#6366f1] focus:ring-offset-0" />
+                  <label htmlFor="adminToggle" className="text-sm text-slate-400 cursor-pointer">Register as Admin (Staff Only)</label>
+                </div>
+              )}
+              {showAuthModal === 'signup' && showAdminSecret && (
+                <div className="animate-in fade-in slide-in-from-top-2">
+                  <label className="block text-sm font-medium text-[#a855f7] mb-1">Admin Secret Code</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#a855f7]" />
+                    <input type="password" value={authAdminSecret} onChange={(e) => setAuthAdminSecret(e.target.value)} required={showAdminSecret} className="w-full bg-[#a855f7]/10 border border-[#a855f7]/30 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-[#a855f7] transition-colors text-[#a855f7] placeholder:text-[#a855f7]/50" placeholder="Enter admin code" />
                   </div>
                 </div>
               )}

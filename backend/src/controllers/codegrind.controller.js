@@ -128,6 +128,28 @@ exports.completeProblem = async (req, res) => {
         newBadges.push({ code: 'FIRST_BLOOD', name: 'First Blood', icon: '🥇' });
       }
 
+      // Update Daily Activity Table
+      await pool.query(`
+        INSERT INTO user_daily_activity (user_id, activity_date, xp_gained, problems_solved)
+        VALUES ($1, CURRENT_DATE, $2, 1)
+        ON CONFLICT (user_id, activity_date)
+        DO UPDATE SET 
+          xp_gained = user_daily_activity.xp_gained + $2,
+          problems_solved = user_daily_activity.problems_solved + 1;
+      `, [userId, xp_value]);
+
+      // Update Squad XP if in active squad
+      const squadRes = await pool.query(`SELECT squad_id FROM squad_members WHERE user_id = $1 AND is_active = true`, [userId]);
+      if (squadRes.rows.length > 0) {
+        const sid = squadRes.rows[0].squad_id;
+        
+        // Add to individual squad_member weekly xp
+        await pool.query(`UPDATE squad_members SET xp_this_week = xp_this_week + $1 WHERE user_id = $2 AND squad_id = $3`, [xp_value, userId, sid]);
+        
+        // Add to total squad XP
+        await pool.query(`UPDATE squads SET total_xp = total_xp + $1 WHERE id = $2`, [xp_value, sid]);
+      }
+
       res.json({ success: true, xp_earned: xp_value, new_badges: newBadges });
     } else {
       res.json({ success: true, xp_earned: 0, message: "Already completed" });
@@ -153,6 +175,13 @@ exports.getStats = async (req, res) => {
 
     const badgesRes = await pool.query(`SELECT badge_code FROM code_grind_badges WHERE user_id = $1`, [userId]);
 
+    const activityRes = await pool.query(`
+      SELECT TO_CHAR(activity_date, 'Dy') as day, xp_gained as xp, problems_solved as tasks
+      FROM user_daily_activity
+      WHERE user_id = $1 AND activity_date >= CURRENT_DATE - INTERVAL '6 days'
+      ORDER BY activity_date ASC
+    `, [userId]);
+
     const breakdown = { Easy: 0, Medium: 0, Hard: 0 };
     totalSolvedRes.rows.forEach(r => breakdown[r.difficulty] = parseInt(r.count));
     
@@ -161,7 +190,8 @@ exports.getStats = async (req, res) => {
       streak: statsRes.rows.length > 0 ? statsRes.rows[0].current_streak : 0,
       breakdown,
       total_solved: breakdown.Easy + breakdown.Medium + breakdown.Hard,
-      badges: badgesRes.rows.map(b => b.badge_code)
+      badges: badgesRes.rows.map(b => b.badge_code),
+      weekly_activity: activityRes.rows
     });
   } catch (err) {
     console.error(err);

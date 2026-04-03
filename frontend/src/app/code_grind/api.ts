@@ -27,6 +27,7 @@ export interface UserStats {
   breakdown: { Easy: number; Medium: number; Hard: number };
   total_solved: number;
   badges: string[];
+  weekly_activity?: { day: string; xp: number; tasks: number }[];
 }
 
 // --- Auth helpers ---
@@ -50,11 +51,11 @@ const authHeaders = (): Record<string, string> => {
 
 // --- Auth API ---
 export const authApi = {
-  register: async (name: string, email: string, password: string) => {
+  register: async (name: string, email: string, password: string, adminSecret?: string) => {
     const res = await fetch(`${API_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, admin_secret: adminSecret }),
     });
     if (!res.ok) {
       const err = await res.json();

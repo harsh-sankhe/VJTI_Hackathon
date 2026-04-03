@@ -1,7 +1,7 @@
 const { Client } = require('pg');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../../../.env') }); // getting from backend/.env
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') }); // getting from backend/.env
 
 const problemsData = require('../data/problems.json');
 
