@@ -12,9 +12,9 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Ensure code_grind_users table exists at startup
+// Ensure users table exists at startup
 pool.query(`
-  CREATE TABLE IF NOT EXISTS code_grind_users (
+  CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -22,7 +22,7 @@ pool.query(`
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 `).then(() => {
-  console.log('code_grind_users table ready.');
+  console.log('users table ready.');
 }).catch(err => {
   console.error('Error ensuring users table:', err.message);
 });

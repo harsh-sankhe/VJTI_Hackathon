@@ -107,6 +107,10 @@ export const codeGrindApi = {
       headers: authHeaders(),
       body: JSON.stringify({ approach_text: approachText }),
     });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Submission failed (Server error)' }));
+      throw new Error(err.error || 'Failed to submit approach');
+    }
     return res.json();
   },
 
@@ -126,6 +130,10 @@ export const codeGrindApi = {
       headers: authHeaders(),
       body: JSON.stringify({ message }),
     });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: 'Post failed' }));
+      throw new Error(err.error || 'Failed to post message');
+    }
     return res.json();
   }
 };

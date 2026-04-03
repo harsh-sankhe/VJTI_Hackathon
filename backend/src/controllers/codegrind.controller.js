@@ -76,8 +76,10 @@ exports.completeProblem = async (req, res) => {
   const problemId = req.params.id;
   const { approach_text } = req.body;
   
-  if (!approach_text || approach_text.trim().split(/\s+/).filter(w => w.length > 0).length < 30) {
-    return res.status(400).json({ error: 'Approach text must be at least 30 words.' });
+  const wordCount = (approach_text || "").trim().split(/\s+/).filter(w => w.length > 0).length;
+  
+  if (wordCount < 30) {
+    return res.status(400).json({ error: `Approach text is too short. Found ${wordCount} words, need at least 30.` });
   }
 
   try {
@@ -87,7 +89,7 @@ exports.completeProblem = async (req, res) => {
     const { xp_value } = probRes.rows[0];
 
     // Check if already completed to avoid double counting XP
-    const userId = getUserId(req);
+    const userId = String(getUserId(req)); // Explicitly cast to string for VARCHAR column
     const statusRes = await pool.query(`SELECT status FROM code_grind_user_progress WHERE user_id = $1 AND problem_id = $2`, [userId, problemId]);
     const alreadyCompleted = statusRes.rows.length > 0 && statusRes.rows[0].status === 'Completed';
 
@@ -192,7 +194,7 @@ exports.postDiscussion = async (req, res) => {
   if (!message) return res.status(400).json({ error: 'Message required' });
 
   try {
-    const userId = getUserId(req);
+    const userId = String(getUserId(req)); // Explicitly cast to string for VARCHAR column
     const result = await pool.query(`
       INSERT INTO code_grind_discussions (problem_id, user_id, message)
       VALUES ($1, $2, $3)

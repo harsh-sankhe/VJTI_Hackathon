@@ -12,7 +12,7 @@ exports.registerUser = async (req, res) => {
     }
 
     // Check if user exists
-    const existing = await pool.query('SELECT * FROM code_grind_users WHERE email = $1', [email]);
+    const existing = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     if (existing.rows.length > 0) {
       return res.status(400).json({ error: 'User already exists.' });
     }
@@ -23,7 +23,7 @@ exports.registerUser = async (req, res) => {
 
     // Insert user
     const newUserResult = await pool.query(
-      'INSERT INTO code_grind_users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email',
+      'INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, name, email',
       [name, email, password_hash]
     );
 
@@ -47,7 +47,7 @@ exports.loginUser = async (req, res) => {
     }
 
     // Check if user exists
-    const userResult = await pool.query('SELECT * FROM code_grind_users WHERE email = $1', [email]);
+    const userResult = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     if (userResult.rows.length === 0) {
       return res.status(400).json({ error: 'Invalid email or password.' });
     }
