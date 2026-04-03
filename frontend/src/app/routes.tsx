@@ -10,6 +10,7 @@ import { Teaching } from "./pages/Teaching";
 import { Feed } from "./pages/Feed";
 import { Profile } from "./pages/Profile";
 import { TeacherDashboard } from "./pages/TeacherDashboard";
+import { CodeGrind } from "./code_grind/CodeGrind";
 
 export const router = createBrowserRouter([
   {
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
       { path: "feed", Component: Feed },
       { path: "profile", Component: Profile },
       { path: "teacher-dashboard", Component: TeacherDashboard },
+      { path: "code-grind", Component: CodeGrind },
     ],
   },
   // Redirects for old routes
@@ -40,4 +42,5 @@ export const router = createBrowserRouter([
   { path: "/feed", loader: () => redirect("/app/feed") },
   { path: "/profile", loader: () => redirect("/app/profile") },
   { path: "/teacher-dashboard", loader: () => redirect("/app/teacher-dashboard") },
+  { path: "/code-grind", loader: () => redirect("/app/code-grind") },
 ]);

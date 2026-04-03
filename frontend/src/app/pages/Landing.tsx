@@ -1,5 +1,6 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useState, useEffect, useRef } from "react";
+import { authApi } from "../code_grind/api";
 import {
   Brain,
   Users,
@@ -23,6 +24,9 @@ import {
   Lock,
   Cpu,
   Layers,
+  X,
+  Mail,
+  User as UserIcon
 } from "lucide-react";
 
 // ── Animated floating orb ──────────────────────────────────────────
@@ -259,6 +263,48 @@ function PricingCard({
 export function Landing() {
   const [scrolled, setScrolled] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState<'signin' | 'signup' | null>(null);
+  const [authName, setAuthName] = useState("");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError("");
+    setAuthLoading(true);
+    try {
+      let result;
+      if (showAuthModal === 'signup') {
+        result = await authApi.register(authName, authEmail, authPassword);
+      } else {
+        result = await authApi.login(authEmail, authPassword);
+      }
+      // Store token + user profile
+      localStorage.setItem('auth_user', JSON.stringify({
+        name: result.user.name,
+        id: result.user.id,
+        token: result.token,
+      }));
+      setShowAuthModal(null);
+      navigate('/app');
+    } catch (err: any) {
+      setAuthError(err.message || 'Something went wrong. Please try again.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  // Reset error when switching modal type
+  const switchModal = (type: 'signin' | 'signup') => {
+    setAuthError("");
+    setAuthName("");
+    setAuthEmail("");
+    setAuthPassword("");
+    setShowAuthModal(type);
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -471,16 +517,19 @@ export function Landing() {
 
           {/* CTA */}
           <div className="flex items-center gap-3">
-            <Link to="/app" className="hidden sm:block text-sm font-medium text-slate-300 hover:text-white transition-colors px-4 py-2">
+            <button 
+              onClick={() => setShowAuthModal('signin')}
+              className="hidden sm:block text-sm font-medium text-slate-300 hover:text-white transition-colors px-4 py-2"
+            >
               Sign In
-            </Link>
-            <Link
-              to="/app"
+            </button>
+            <button
+              onClick={() => setShowAuthModal('signup')}
               className="btn-primary px-5 py-2.5 text-white rounded-xl font-semibold text-sm shadow-lg shadow-[#6366f1]/30 hover:scale-105 hover:shadow-[#6366f1]/50 transition-all duration-300 flex items-center gap-2"
             >
               Get Started Free
               <ArrowRight className="w-4 h-4" />
-            </Link>
+            </button>
           </div>
         </div>
       </nav>
@@ -515,14 +564,14 @@ export function Landing() {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <Link
-              to="/app"
+            <button
+              onClick={() => setShowAuthModal('signup')}
               className="btn-primary group flex items-center gap-3 px-10 py-5 text-white rounded-2xl font-bold text-lg shadow-2xl shadow-[#6366f1]/40 hover:scale-105 hover:shadow-[#6366f1]/60 transition-all duration-300"
             >
               <Rocket className="w-5 h-5 group-hover:rotate-12 transition-transform" />
               Start Learning Free
               <ArrowRight className="w-5 h-5" />
-            </Link>
+            </button>
             <button
               onClick={() => setVideoOpen(true)}
               className="group flex items-center gap-3 px-8 py-5 rounded-2xl font-bold text-lg border border-white/20 bg-white/5 backdrop-blur-sm hover:bg-white/10 hover:border-white/40 transition-all duration-300"
@@ -941,9 +990,95 @@ export function Landing() {
       )}
 
       {/* Scroll indicator */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 animate-bounce opacity-40 z-40">
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 animate-bounce opacity-40 z-40 pointer-events-none">
         <ChevronDown className="w-6 h-6 text-white" />
       </div>
+
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <div
+          className="fixed inset-0 z-[200] bg-[#080B1A]/80 backdrop-blur-lg flex items-center justify-center p-6 animate-in fade-in duration-300"
+          onClick={() => setShowAuthModal(null)}
+        >
+          <div
+            className="relative bg-white/5 backdrop-blur-xl rounded-3xl p-8 max-w-md w-full border border-white/20 shadow-2xl animate-in zoom-in-95 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowAuthModal(null)}
+              className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 transition-colors text-white"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+            
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#6366f1] to-[#a855f7] flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#6366f1]/30">
+                 <span className="text-white font-black text-2xl">L</span>
+              </div>
+              <h3 className="text-2xl font-bold text-white">
+                {showAuthModal === 'signin' ? 'Welcome back' : 'Create an account'}
+              </h3>
+              <p className="text-slate-400 mt-2">
+                {showAuthModal === 'signin' ? 'Enter your details to access your dashboard' : 'Start your incredible learning journey today.'}
+              </p>
+            </div>
+
+            <form className="space-y-4" onSubmit={handleAuthSubmit}>
+              {showAuthModal === 'signup' && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1">Full Name</label>
+                  <div className="relative">
+                    <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                    <input type="text" value={authName} onChange={(e) => setAuthName(e.target.value)} required={showAuthModal === 'signup'} className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-[#6366f1] transition-colors text-white placeholder:text-slate-500" placeholder="John Doe" />
+                  </div>
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                  <input type="email" value={authEmail} onChange={(e) => setAuthEmail(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-[#6366f1] transition-colors text-white placeholder:text-slate-500" placeholder="you@example.com" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-1">Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500" />
+                  <input type="password" value={authPassword} onChange={(e) => setAuthPassword(e.target.value)} required className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-[#6366f1] transition-colors text-white placeholder:text-slate-500" placeholder="••••••••" />
+                </div>
+              </div>
+
+              {/* Error message */}
+              {authError && (
+                <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-4 py-3 rounded-xl">
+                  {authError}
+                </div>
+              )}
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={authLoading}
+                  className="w-full btn-primary block text-center py-3.5 rounded-xl font-bold text-white shadow-lg shadow-[#6366f1]/30 hover:scale-[1.02] transition-transform disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+                >
+                  {authLoading
+                    ? (showAuthModal === 'signin' ? 'Signing in...' : 'Creating account...')
+                    : (showAuthModal === 'signin' ? 'Sign In to Dashboard' : 'Create Free Account')
+                  }
+                </button>
+              </div>
+            </form>
+            
+            <div className="mt-6 text-center text-sm text-slate-400">
+              {showAuthModal === 'signin' ? (
+                 <>Don't have an account? <button onClick={() => switchModal('signup')} className="text-[#a855f7] font-medium hover:text-[#c084fc] transition-colors hover:underline">Sign up</button></>
+              ) : (
+                 <>Already have an account? <button onClick={() => switchModal('signin')} className="text-[#a855f7] font-medium hover:text-[#c084fc] transition-colors hover:underline">Sign in</button></>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

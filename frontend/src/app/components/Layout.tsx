@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Outlet, Link, useLocation } from "react-router";
+import { useState, useEffect } from "react";
+import { Outlet, Link, useLocation, useNavigate } from "react-router";
 import {
   Home,
   Calendar,
@@ -14,14 +14,37 @@ import {
   Bell,
   Menu,
   X,
-  Moon,
   Sun,
+  Moon,
+  Code2,
 } from "lucide-react";
 
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+  const [authUser, setAuthUser] = useState({ name: 'Guest', letter: 'G' });
   const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const stored = localStorage.getItem('auth_user');
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setAuthUser({ name: parsed.name, letter: parsed.name.charAt(0).toUpperCase() });
+      } catch (e) {
+        console.error("Failed to parse stored user", e);
+      }
+    } else {
+      setAuthUser({ name: 'Guest', letter: 'G' });
+    }
+  }, [location.pathname]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('auth_user');
+    setAuthUser({ name: 'Guest', letter: 'G' });
+    navigate('/');
+  };
 
   const toggleDarkMode = () => {
     const newDarkMode = !darkMode;
@@ -41,6 +64,7 @@ export function Layout() {
     { path: "/app/squad", label: "Squad", icon: Users },
     { path: "/app/teaching", label: "Teaching", icon: GraduationCap },
     { path: "/app/feed", label: "Feed", icon: Newspaper },
+    { path: "/app/code-grind", label: "Code Grind", icon: Code2 },
     { path: "/app/profile", label: "Profile", icon: User },
     { path: "/app/teacher-dashboard", label: "Teacher Dashboard", icon: BookOpen },
   ];
@@ -56,12 +80,12 @@ export function Layout() {
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-6 border-b border-sidebar-border">
           {sidebarOpen && (
-            <div className="flex items-center gap-3">
+            <Link to="/" className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#a855f7] flex items-center justify-center shadow-md">
                 <span className="text-white font-bold text-lg">L</span>
               </div>
-              <span className="font-bold text-sidebar-foreground text-lg">Learnix</span>
-            </div>
+              <span className="font-bold text-sidebar-foreground text-lg hover:opacity-80 transition-opacity">Learnix</span>
+            </Link>
           )}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -138,12 +162,32 @@ export function Layout() {
             </button>
 
             {/* User Avatar */}
-            <button className="flex items-center gap-3 p-2 pr-4 hover:bg-secondary rounded-xl transition-all border border-transparent hover:border-border">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#a855f7] flex items-center justify-center shadow-sm">
-                <span className="text-white font-bold">H</span>
+            <div className="relative group z-50">
+              <button className="flex items-center gap-3 p-2 pr-4 hover:bg-secondary rounded-xl transition-all border border-transparent hover:border-border">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#a855f7] flex items-center justify-center shadow-sm">
+                  <span className="text-white font-bold">{authUser.letter}</span>
+                </div>
+                <span className="font-medium text-foreground hidden md:block">{authUser.name}</span>
+              </button>
+
+              {/* Dropdown Menu */}
+              <div className="absolute right-0 top-full mt-2 w-48 bg-card border border-border rounded-xl shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                <div className="p-2 space-y-1">
+                  <Link to="/app/profile" className="flex items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-secondary rounded-lg transition-colors">
+                    <User className="w-4 h-4 text-muted-foreground" />
+                    Profile
+                  </Link>
+                  <div className="h-px bg-border my-1" />
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                    Log out
+                  </button>
+                </div>
               </div>
-              <span className="font-medium text-foreground hidden md:block">Harsh</span>
-            </button>
+            </div>
           </div>
         </header>
 
