@@ -4,6 +4,7 @@ import { Landing } from "./pages/Landing";
 import { Dashboard } from "./pages/Dashboard";
 import { StudyPlan } from "./pages/StudyPlan";
 import { Quiz } from "./pages/Quiz";
+import { QuizTopicSelect } from "./pages/QuizTopicSelect";
 import { Insights } from "./pages/Insights";
 import { Squad } from "./pages/Squad";
 import { Teaching } from "./pages/Teaching";
@@ -24,6 +25,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, Component: Dashboard },
       { path: "study-plan", Component: StudyPlan },
+      { path: "quiz-select", Component: QuizTopicSelect },
       { path: "quiz", Component: Quiz },
       { path: "insights", Component: Insights },
       { path: "squad", Component: Squad },

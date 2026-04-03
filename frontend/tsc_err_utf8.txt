@@ -1,0 +1,10 @@
+﻿src/app/pages/Insights.tsx(41,5): error TS2657: JSX expressions must have one parent element.
+src/app/pages/Insights.tsx(92,16): error TS2657: JSX expressions must have one parent element.
+src/app/pages/Insights.tsx(98,69): error TS1127: Invalid character.
+src/app/pages/Insights.tsx(98,112): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/app/pages/Insights.tsx(98,113): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/app/pages/Insights.tsx(98,114): error TS1382: Unexpected token. Did you mean `{'>'}` or `&gt;`?
+src/app/pages/Insights.tsx(101,16): error TS1005: ')' expected.
+src/app/pages/Insights.tsx(102,15): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+src/app/pages/Insights.tsx(171,5): error TS1005: ')' expected.
+src/app/pages/Insights.tsx(172,3): error TS1109: Expression expected.

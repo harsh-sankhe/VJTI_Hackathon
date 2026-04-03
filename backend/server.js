@@ -44,11 +44,13 @@ const authRoutes = require('./src/routes/auth.routes');
 const codeGrindRoutes = require('./src/routes/codegrind.routes');
 const squadRoutes = require('./src/routes/squad.routes');
 const adminRoutes = require('./src/routes/admin.routes');
+const quizRoutes = require('./src/routes/quiz.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/code_grind', codeGrindRoutes);
 app.use('/api/squad', squadRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/quiz', quizRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
